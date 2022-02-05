@@ -1,0 +1,17 @@
+{
+    "liveServer.settings.port": 12345,
+    "liveServer.settings.root": "/build",
+    "liveServer.settings.CustomBrowser": "chrome",
+    "liveServer.settings.NoBrowser": false,
+    "liveServer.settings.ignoreFiles": [
+        ".vscode/**",
+        "**/*.scss",
+        "**/*.sass"
+    ],
+    "liveServer.settings.https": {
+        "enable": true,
+        "cert": "F:/howerbuiltapp.test.crt",
+        "key": "F:/howerbuiltapp.test.key",
+        "passphrase": "12345"
+    }
+}
