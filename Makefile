@@ -1,4 +1,4 @@
-.PHONY: install sw clean
+.PHONY: install sw clean cert clean-cert
 
 sw: clean
 	workbox generateSW workbox-config.js
@@ -8,3 +8,9 @@ install:
 
 clean:
 	rm build/sw.js* build/workbox*.js*
+
+cert: clean-cert
+	openssl req -x509 -nodes -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=192.168.1.15"
+
+clean-cert:
+	rm -f *.pem
