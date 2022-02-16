@@ -2,6 +2,7 @@
   "devDependencies": {
     "@swc/cli": "^0.1.55",
     "@swc/core": "^1.2.140",
+    "@types/regenerator-runtime": "^0.13.1",
     "workbox-cli": "^6.4.2"
   }
 }

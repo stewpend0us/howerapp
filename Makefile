@@ -11,6 +11,7 @@ build: clean
 install:
 	npm i -D workbox-cli
 	npm i -D @swc/cli @swc/core
+	npm i -D @types/regenerator-runtime
 
 clean:
 	rm -rf build/
