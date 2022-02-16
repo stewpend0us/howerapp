@@ -55,7 +55,7 @@ let UARTTx = undefined;
 async function askUserToConnect() {
   try {
     BLEDevice = await navigator.bluetooth.requestDevice({
-      acceptAllDevices = false,
+      acceptAllDevices: false,
       filters: [
         { namePrefix: "Itsy" },
         { namePrefix: "Hower" }
