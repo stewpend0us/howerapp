@@ -17,7 +17,6 @@ connectbutton.onclick = askUserToConnect;
 function startup() {
   navigator.serviceWorker?.register("./sw.js");
   setOrientation();
-  puseragent.textContent = window.navigator.userAgent;
 }
 
 // general stuff
@@ -54,6 +53,7 @@ let UARTRx = undefined;
 let UARTTx = undefined;
 
 async function askUserToConnect() {
+  puseragent.textContent = window.navigator.userAgent;
   try {
     const options = {
       acceptAllDevices: false,
@@ -61,7 +61,7 @@ async function askUserToConnect() {
         { namePrefix: "Itsy" },
         { namePrefix: "Hower" }
       ],
-//      optionalServices: [UART.service]
+      services: [UART.service]
     };
 
     BLEDevice = await navigator.bluetooth.requestDevice(options);
