@@ -7,7 +7,7 @@ const downbutton = document.getElementById("downbutton");
 const updatebutton = document.getElementById("updatebutton");
 const statusmessage = document.getElementById("statusmessage");
 const mainsection = document.getElementById("mainsection");
-const devconsole = document.getElementById("devconsole");
+const puseragent= document.getElementById("useragent");
 
 // handlers
 window.onload = startup;
@@ -17,6 +17,7 @@ connectbutton.onclick = askUserToConnect;
 function startup() {
   navigator.serviceWorker?.register("./sw.js");
   setOrientation();
+  puseragent.textContent = window.navigator.userAgent;
 }
 
 // general stuff
@@ -54,14 +55,16 @@ let UARTTx = undefined;
 
 async function askUserToConnect() {
   try {
-    BLEDevice = await navigator.bluetooth.requestDevice({
+    const options = {
       acceptAllDevices: false,
       filters: [
         { namePrefix: "Itsy" },
         { namePrefix: "Hower" }
       ],
 //      optionalServices: [UART.service]
-    });
+    };
+
+    BLEDevice = await navigator.bluetooth.requestDevice(options);
     updateStatus("Connecting...");
     BLEDevice.addEventListener("gattserverdisconnected", (ev) => handleDisconnect("Device disconnected."));
     GATTServer = await BLEDevice.gatt.connect();
