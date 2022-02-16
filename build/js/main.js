@@ -15,6 +15,7 @@ screen.orientation.onchange = setOrientation;
 connectbutton.onclick = askUserToConnect;
 
 function startup() {
+  alert("hi");
   navigator.serviceWorker?.register("./sw.js");
   setOrientation();
 }
