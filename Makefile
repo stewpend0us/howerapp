@@ -7,6 +7,7 @@ build: clean
 	cp -r src/ build/
 	npx swc src/js/ -d build/
 	workbox generateSW workbox-config.js
+	cp node_modules/regenerator-runtime/runtime.js build/js/regenerator-runtime.js
 
 install:
 	npm i -D workbox-cli
