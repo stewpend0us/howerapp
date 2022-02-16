@@ -1,16 +1,19 @@
-.PHONY: install sw clean cert clean-cert all
+.PHONY: all build install clean cert clean-cert
 
-all: sw
+all:
 	git add build/sw.js build/js/main.js build/index.html build/css/style.css
 
-sw: clean
+build: clean
+	cp -r src/ build/
+	npx swc src/js/ -d build/
 	workbox generateSW workbox-config.js
 
 install:
-	npm install workbox-cli
+	npm i -D workbox-cli
+	npm i -D @swc/cli @swc/core
 
 clean:
-	rm build/sw.js* build/workbox*.js*
+	rm -rf build/
 
 cert: clean-cert
 	openssl req -x509 -nodes -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=192.168.1.15"
