@@ -7,6 +7,7 @@ const downbutton = document.getElementById("downbutton");
 const updatebutton = document.getElementById("updatebutton");
 const statusmessage = document.getElementById("statusmessage");
 const mainsection = document.getElementById("mainsection");
+const devconsole = document.getElementById("devconsole");
 
 // handlers
 window.onload = startup;
@@ -58,10 +59,10 @@ async function askUserToConnect() {
         { namePrefix: ["Itsy"] },
         { namePrefix: ["Hower"] }
       ],
-      optionalServices: [UART.service]
+//      optionalServices: [UART.service]
     });
     updateStatus("Connecting...");
-    BLEDevice.addEventListener("gattserverdisconnected", handleDisconnect);
+    BLEDevice.addEventListener("gattserverdisconnected", (ev) => handleDisconnect("Device disconnected."));
     GATTServer = await BLEDevice.gatt.connect();
     UARTService = await GATTServer.getPrimaryService(UART.service);
     UARTTx = await UARTService.getCharacteristic(UART.TX);
@@ -82,7 +83,7 @@ async function askUserToConnect() {
 }
 
 function handleDisconnect(ev) {
-  updateStatus("Device Disconnected.");
+  updateStatus(ev);
   BLEDevice = undefined;
   GATTServer = undefined;
   UARTService = undefined;
