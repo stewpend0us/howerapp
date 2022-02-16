@@ -1,4 +1,7 @@
-.PHONY: install sw clean cert clean-cert
+.PHONY: install sw clean cert clean-cert all
+
+all: sw
+	git add build/sw.js build/js/main.js build/index.html build/css/style.css
 
 sw: clean
 	workbox generateSW workbox-config.js

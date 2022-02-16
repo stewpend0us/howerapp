@@ -17,6 +17,7 @@ connectbutton.onclick = askUserToConnect;
 function startup() {
   alert("hi");
   navigator.serviceWorker?.register("./sw.js");
+  alert("there");
   setOrientation();
 }
 
@@ -24,6 +25,7 @@ function startup() {
 function updateStatus(e) {
   console.log(e);
   statusmessage.textContent = e.message ?? String(e);
+  alert(statusmessage.textContent);
 }
 
 // change layout depending on orientation
@@ -54,6 +56,7 @@ let UARTRx = undefined;
 let UARTTx = undefined;
 
 async function askUserToConnect() {
+  alert("button");
   puseragent.textContent = window.navigator.userAgent;
   try {
     const options = {
