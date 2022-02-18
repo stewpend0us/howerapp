@@ -2,12 +2,12 @@
 
 // objects on the page
 const connectbutton = document.getElementById("connectbutton");
-//const upbutton = document.getElementById("upbutton");
-//const downbutton = document.getElementById("downbutton");
-//const updatebutton = document.getElementById("updatebutton");
+const upbutton = document.getElementById("upbutton");
+const downbutton = document.getElementById("downbutton");
+const updatebutton = document.getElementById("updatebutton");
 //const statusmessage = document.getElementById("statusmessage");
 //const mainsection = document.getElementById("mainsection");
-//const puseragent= document.getElementById("useragent");
+const puseragent= document.getElementById("useragent");
 
 // handlers
 //window.addEventListener("load", startup);
@@ -28,7 +28,7 @@ function updateStatus(e) {
   statusmessage.textContent = e.message ?? String(e);
   alert(statusmessage.textContent);
 }
-/*
+
 // change layout depending on orientation
 function setOrientation() {
   let value = "";
@@ -55,7 +55,7 @@ let GATTServer = undefined;
 let UARTService = undefined;
 let UARTRx = undefined;
 let UARTTx = undefined;
-*/
+
 
 function askUserToConnect() {
   alert("button");
@@ -92,7 +92,7 @@ function askUserToConnect() {
 
 }
 
-/*
+
 function handleDisconnect(ev) {
   updateStatus(ev);
   BLEDevice = undefined;
@@ -106,6 +106,7 @@ function handleDisconnect(ev) {
   downbutton.classList.add("hidden");
 }
 
+/*
 function handleUartRx(ev) {
   ev.message = arraybuffer2str(ev.currentTarget.value.buffer);
   updateStatus(ev);
@@ -126,17 +127,18 @@ function str2arraybuffer(str) {
   return buf;
 }
 
-upbutton.addEventListener("click", async (el, ev) => {
+*/
+upbutton.addEventListener("click", /*async*/ () => {
   updateStatus("UP");
-  await UARTTx.writeValue(str2arraybuffer("Go up!\n"));
+  //await UARTTx.writeValue(str2arraybuffer("Go up!\n"));
 });
 
-downbutton.addEventListener("click", async (el, ev) => {
+downbutton.addEventListener("click", /*async*/ () => {
   updateStatus("DOWN");
-  await UARTTx.writeValue(str2arraybuffer("Go down!\n"));
+  //await UARTTx.writeValue(str2arraybuffer("Go down!\n"));
 });
 
-updatebutton.addEventListener("click", (el, ev) => {
+updatebutton.addEventListener("click", () => {
   updateStatus("UPDATE");
 });
-*/
+
