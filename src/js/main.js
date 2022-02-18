@@ -11,7 +11,13 @@ const puseragent = document.getElementById("useragent");
 
 // handlers
 //window.addEventListener("load", startup);
-screen.orientation?.addEventListener("change", setOrientation);
+if (screen.orientation){
+  screen.orientation.addEventListener("change", setOrientation);
+}
+else
+{
+  window.addEventListener("orientationchange", setOrientationIOS);
+}
 connectbutton.addEventListener("click", askUserToConnect);
 /*
 function startup() {
@@ -40,6 +46,10 @@ function setOrientation() {
     default: console.log(screen.orientation.type); return;
   }
   mainsection.style.flexDirection = value;
+}
+
+function setOrientationIOS() {
+  updateStatus(window.orientation);
 }
 
 // bluetooth stuff
