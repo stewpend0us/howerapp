@@ -10,9 +10,9 @@ const mainsection = document.getElementById("mainsection");
 const puseragent= document.getElementById("useragent");
 
 // handlers
-window.onload = startup;
-screen.orientation.onchange = setOrientation;
-connectbutton.onclick = askUserToConnect;
+window.addEventListener("load", startup);
+screen.orientation.addEventListener("change", setOrientation);
+connectbutton.addEventListener("click", askUserToConnect);
 
 function startup() {
   alert("hi");
