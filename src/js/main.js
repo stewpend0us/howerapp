@@ -21,7 +21,18 @@ connectbutton.addEventListener("click", askUserToConnect);
 /*
 function startup() {
   alert("hi");
+  if (navigator.serviceWorker)
+  {
   navigator.serviceWorker?.register("./sw.js");
+  }
+  else
+  {
+    updateStatus("no service worker :(");
+  }
+  if (!navigator.bluetooth)
+  {
+    updateStatus("no bluetooth :(");
+  }
   alert("there");
   setOrientation();
 }
@@ -127,7 +138,7 @@ function handleDisconnect(ev) {
 }
 
 function handleUartRx(ev) {
-  //ev.message = arraybuffer2str(ev.currentTarget.value.buffer);
+  ev.message = arraybuffer2str(ev.currentTarget.value.buffer);
   updateStatus(ev);
 }
 
