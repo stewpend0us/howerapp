@@ -73,30 +73,27 @@ function askUserToConnect() {
     BLEDevice = device;
     updateStatus("Connecting...");
     BLEDevice.addEventListener("gattserverdisconnected", () => handleDisconnect("Device disconnected."));
-    BLEDevice.gatt.connect().then(server => {
-      GATTServer = server;
-      GATTServer.getPrimaryService(UART.service).then(service => {
-        UARTService = service;
-        UARTService.getCharacteristic(UART.TX).then(char => {
-          UARTTx = char;
-        });
-        UARTService.getCharacteristic(UART.RX).then(char => {
-          UARTRx = char;
-          UARTRx.startNotifications().then(notification => {
-            RxNotifications = notification;
-            RxNotifications.addEventListener("characteristicvaluechanged", handleUartRx);
-          });
-        });
-        updateStatus("Connected.");
-        connectbutton.classList.add("hidden");
-        upbutton.classList.remove("hidden");
-        downbutton.classList.remove("hidden");
-      });
-    });
-  }).catch(err => {
-    handleDisconnect(err);
-  });
-
+    //BLEDevice.gatt.connect().then(server => {
+    //  GATTServer = server;
+    //  GATTServer.getPrimaryService(UART.service).then(service => {
+    //    UARTService = service;
+    //    UARTService.getCharacteristic(UART.TX).then(char => {
+    //      UARTTx = char;
+    //    });
+    //    UARTService.getCharacteristic(UART.RX).then(char => {
+    //      UARTRx = char;
+    //      UARTRx.startNotifications().then(notification => {
+    //        RxNotifications = notification;
+    //        RxNotifications.addEventListener("characteristicvaluechanged", handleUartRx);
+    //      });
+    //    });
+    //    updateStatus("Connected.");
+    //    connectbutton.classList.add("hidden");
+    //    upbutton.classList.remove("hidden");
+    //    downbutton.classList.remove("hidden");
+    //  });
+    //});
+  }).catch(handleDisconnect);
 }
 
 function handleDisconnect(ev) {
