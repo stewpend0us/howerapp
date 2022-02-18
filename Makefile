@@ -1,13 +1,11 @@
 .PHONY: all build install clean cert clean-cert
 
-all:
-	git add build/sw.js build/js/main.js build/index.html build/css/style.css
+all: build
 
 build: clean
 	cp -r src/ build/
-	npx swc src/js/ -d build/
+	npx spack
 	workbox generateSW workbox-config.js
-	cp node_modules/regenerator-runtime/runtime.js build/js/regenerator-runtime.js
 
 install:
 	npm i -D workbox-cli

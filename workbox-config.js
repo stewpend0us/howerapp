@@ -7,6 +7,5 @@ module.exports = {
 	ignoreURLParametersMatching: [
 		/^utm_/,
 		/^fbclid$/
-	],
-	sourcemap: false,
+	]
 };
