@@ -11,7 +11,7 @@ const mainsection = document.getElementById("mainsection");
 const puseragent = document.getElementById("useragent");
 
 // handlers
-//window.addEventListener("load", startup);
+window.addEventListener("load", startup);
 if (screen.orientation) {
   screen.orientation.addEventListener("change", setOrientation);
 }
