@@ -46,10 +46,10 @@ function updateStatus(e) {
 }
 
 // change layout depending on orientation
-function setOrientation(el) {
+function setOrientation(ev) {
   let value = "";
-  updateStatus(el.angle ?? el);
-  switch (el.angle ?? el) {
+  updateStatus(ev.target.angle ?? ev.target);
+  switch (ev.target.angle ?? ev.target) {
     case 90: value = "row"; break;
     case -90:
     case 270: value = "row-reverse"; break;
@@ -160,15 +160,27 @@ function str2arraybuffer(str) {
   return buf;
 }
 
-upbutton.addEventListener("click", () => {
+upbutton.addEventListener("mousedown", () => {
   updateStatus("UP");
   UARTTx.writeValue(str2arraybuffer("Go up!\n"))
     .catch(updateStatus);
 });
 
-downbutton.addEventListener("click", () => {
+upbutton.addEventListener("mouseup", () => {
+  updateStatus("...");
+  UARTTx.writeValue(str2arraybuffer("no more go up\n"))
+    .catch(updateStatus);
+});
+
+downbutton.addEventListener("mousedown", () => {
   updateStatus("DOWN");
   UARTTx.writeValue(str2arraybuffer("Go down!\n"))
+    .catch(updateStatus);
+});
+
+downbutton.addEventListener("mouseup", () => {
+  updateStatus("...");
+  UARTTx.writeValue(str2arraybuffer("no more go down\n"))
     .catch(updateStatus);
 });
 
