@@ -101,15 +101,10 @@ function askUserToConnect() {
       return UARTService.getCharacteristic(UART.RX);
     })
     .then(char => {
-      updateStatus("Getting Rx characteristic.");
-      UARTRx = char;
-      return UARTRx.startNotifications();
-    })
-    .then(char => {
       updateStatus("Listening for Rx notifications.");
-      RxNotifications = char;
-      RxNotifications.addEventListener("characteristicvaluechanged", handleUartRx);
-      RxNotifications.startNotifications();
+      UARTRx = char;
+      UARTRx.addEventListener("characteristicvaluechanged", handleUartRx);
+      UARTRx.startNotifications();
       return;
     })
     .then(() => {
@@ -157,12 +152,14 @@ function str2arraybuffer(str) {
 
 upbutton.addEventListener("click", () => {
   updateStatus("UP");
-  //await UARTTx.writeValue(str2arraybuffer("Go up!\n"));
+  UARTTx.writeValue(str2arraybuffer("Go up!\n"))
+  .catch(updateStatus);
 });
 
 downbutton.addEventListener("click", () => {
   updateStatus("DOWN");
-  //await UARTTx.writeValue(str2arraybuffer("Go down!\n"));
+  UARTTx.writeValue(str2arraybuffer("Go down!\n"))
+  .catch(updateStatus);
 });
 
 updatebutton.addEventListener("click", () => {
