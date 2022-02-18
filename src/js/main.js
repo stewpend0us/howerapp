@@ -45,10 +45,9 @@ function updateStatus(e) {
 }
 
 // change layout depending on orientation
-function setOrientation(ev) {
+function setOrientation() {
   let value = "";
-  updateStatus(ev.target.angle ?? ev.target.orientation);
-  switch (ev.target.angle ?? ev.target.orientation) {
+  switch (screen.orientation?.angle ?? window.orientation) {
     case 90: value = "row"; break;
     case -90:
     case 270: value = "row-reverse"; break;
