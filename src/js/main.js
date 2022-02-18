@@ -5,13 +5,13 @@ const connectbutton = document.getElementById("connectbutton");
 const upbutton = document.getElementById("upbutton");
 const downbutton = document.getElementById("downbutton");
 const updatebutton = document.getElementById("updatebutton");
-//const statusmessage = document.getElementById("statusmessage");
-//const mainsection = document.getElementById("mainsection");
+const statusmessage = document.getElementById("statusmessage");
+const mainsection = document.getElementById("mainsection");
 const puseragent= document.getElementById("useragent");
 
 // handlers
 //window.addEventListener("load", startup);
-//screen.orientation.addEventListener("change", setOrientation);
+screen.orientation.addEventListener("change", setOrientation);
 connectbutton.addEventListener("click", askUserToConnect);
 /*
 function startup() {
@@ -56,7 +56,6 @@ let UARTService = undefined;
 let UARTRx = undefined;
 let UARTTx = undefined;
 
-
 function askUserToConnect() {
   alert("button");
 
@@ -92,7 +91,6 @@ function askUserToConnect() {
 
 }
 
-
 function handleDisconnect(ev) {
   updateStatus(ev);
   BLEDevice = undefined;
@@ -106,7 +104,7 @@ function handleDisconnect(ev) {
   downbutton.classList.add("hidden");
 }
 
-/*
+
 function handleUartRx(ev) {
   ev.message = arraybuffer2str(ev.currentTarget.value.buffer);
   updateStatus(ev);
@@ -127,8 +125,7 @@ function str2arraybuffer(str) {
   return buf;
 }
 
-*/
-upbutton.addEventListener("click", /*async*/ () => {
+upbutton.addEventListener("click", async () => {
   updateStatus("UP");
   //await UARTTx.writeValue(str2arraybuffer("Go up!\n"));
 });
