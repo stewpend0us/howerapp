@@ -2,18 +2,18 @@
 
 // objects on the page
 const connectbutton = document.getElementById("connectbutton");
-const upbutton = document.getElementById("upbutton");
-const downbutton = document.getElementById("downbutton");
-const updatebutton = document.getElementById("updatebutton");
-const statusmessage = document.getElementById("statusmessage");
-const mainsection = document.getElementById("mainsection");
-const puseragent= document.getElementById("useragent");
+//const upbutton = document.getElementById("upbutton");
+//const downbutton = document.getElementById("downbutton");
+//const updatebutton = document.getElementById("updatebutton");
+//const statusmessage = document.getElementById("statusmessage");
+//const mainsection = document.getElementById("mainsection");
+//const puseragent= document.getElementById("useragent");
 
 // handlers
-window.addEventListener("load", startup);
-screen.orientation.addEventListener("change", setOrientation);
+//window.addEventListener("load", startup);
+//screen.orientation.addEventListener("change", setOrientation);
 connectbutton.addEventListener("click", askUserToConnect);
-
+/*
 function startup() {
   alert("hi");
   navigator.serviceWorker?.register("./sw.js");
@@ -54,10 +54,11 @@ let GATTServer = undefined;
 let UARTService = undefined;
 let UARTRx = undefined;
 let UARTTx = undefined;
+*/
 
 function askUserToConnect() {
   alert("button");
-  /*
+}/*
   puseragent.textContent = window.navigator.userAgent;
   try {
     const options = {
@@ -87,7 +88,7 @@ function askUserToConnect() {
   connectbutton.classList.add("hidden");
   upbutton.classList.remove("hidden");
   downbutton.classList.remove("hidden");
-*/
+
 }
 
 function handleDisconnect(ev) {
@@ -136,3 +137,4 @@ downbutton.addEventListener("click", async (el, ev) => {
 updatebutton.addEventListener("click", (el, ev) => {
   updateStatus("UPDATE");
 });
+*/
