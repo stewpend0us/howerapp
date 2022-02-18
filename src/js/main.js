@@ -83,7 +83,7 @@ function askUserToConnect() {
     BLEDevice = device;
     updateStatus("Connecting...");
     BLEDevice.addEventListener("gattserverdisconnected", handleDisconnect);
-    BLEDevice.gatt.connect();/*.then(server => {
+    BLEDevice.gatt.connect().then(server => {
       GATTServer = server;
       GATTServer.getPrimaryService(UART.service).then(service => {
         UARTService = service;
@@ -104,9 +104,7 @@ function askUserToConnect() {
       });
     });
   }).catch(handleDisconnect);
- */
     updateStatus("Connected.");
-  });
 }
 
 function handleDisconnect(ev) {
