@@ -68,7 +68,7 @@ function askUserToConnect() {
     ],
     services: [UART.service]
   };
-
+/*
   navigator.bluetooth.requestDevice(options).then(device => {
     BLEDevice = device;
     updateStatus("Connecting...");
@@ -94,6 +94,8 @@ function askUserToConnect() {
     //  });
     //});
   }).catch(handleDisconnect);
+  */
+ updateStatus("Connected.");
 }
 
 function handleDisconnect(ev) {
