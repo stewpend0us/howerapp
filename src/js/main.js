@@ -89,68 +89,70 @@ function askUserToConnect() {
         UARTService = service;
         UARTService.getCharacteristic(UART.TX).then(char => {
           UARTTx = char;
-        });
-        UARTService.getCharacteristic(UART.RX).then(char => {
-          UARTRx = char;
-          UARTRx.startNotifications().then(notification => {
-            RxNotifications = notification;
-            RxNotifications.addEventListener("characteristicvaluechanged", handleUartRx);
+        }).then(() => {
+          UARTService.getCharacteristic(UART.RX).then(char => {
+            UARTRx = char;
+            UARTRx.startNotifications().then(notification => {
+              RxNotifications = notification;
+              RxNotifications.addEventListener("characteristicvaluechanged", handleUartRx);
+            }).then(() => {
+              updateStatus("Connected.");
+              connectbutton.classList.add("hidden");
+              upbutton.classList.remove("hidden");
+              downbutton.classList.remove("hidden");
+            });
           });
         });
-        updateStatus("Connected.");
-        connectbutton.classList.add("hidden");
-        upbutton.classList.remove("hidden");
-        downbutton.classList.remove("hidden");
       });
     });
   }).catch(handleDisconnect);
-    updateStatus("Connected.");
+  updateStatus("Connected.");
 }
 
 function handleDisconnect(ev) {
-      updateStatus(ev);
-      BLEDevice = undefined;
-      GATTServer = undefined;
-      UARTService = undefined;
-      UARTRx = undefined;
-      UARTTx = undefined;
+  updateStatus(ev);
+  BLEDevice = undefined;
+  GATTServer = undefined;
+  UARTService = undefined;
+  UARTRx = undefined;
+  UARTTx = undefined;
 
-      connectbutton.classList.remove("hidden");
-      upbutton.classList.add("hidden");
-      downbutton.classList.add("hidden");
-    }
+  connectbutton.classList.remove("hidden");
+  upbutton.classList.add("hidden");
+  downbutton.classList.add("hidden");
+}
 
 function handleUartRx(ev) {
-      ev.message = arraybuffer2str(ev.currentTarget.value.buffer);
-      updateStatus(ev);
-    }
+  ev.message = arraybuffer2str(ev.currentTarget.value.buffer);
+  updateStatus(ev);
+}
 
 // https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
 // look into "TextEncoder"?
 function arraybuffer2str(buf) {
-      return String.fromCharCode.apply(null, new Uint8Array(buf));
-    }
+  return String.fromCharCode.apply(null, new Uint8Array(buf));
+}
 
 function str2arraybuffer(str) {
-      let buf = new ArrayBuffer(str.length); // 2 bytes for each char
-      let bufView = new Uint8Array(buf);
-      for (let i = 0, strLen = str.length; i < strLen; i++) {
-        bufView[i] = str.charCodeAt(i);
-      }
-      return buf;
-    }
+  let buf = new ArrayBuffer(str.length); // 2 bytes for each char
+  let bufView = new Uint8Array(buf);
+  for (let i = 0, strLen = str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
 
 upbutton.addEventListener("click", () => {
-      updateStatus("UP");
-      //await UARTTx.writeValue(str2arraybuffer("Go up!\n"));
-    });
+  updateStatus("UP");
+  //await UARTTx.writeValue(str2arraybuffer("Go up!\n"));
+});
 
-  downbutton.addEventListener("click", () => {
-    updateStatus("DOWN");
-    //await UARTTx.writeValue(str2arraybuffer("Go down!\n"));
-  });
+downbutton.addEventListener("click", () => {
+  updateStatus("DOWN");
+  //await UARTTx.writeValue(str2arraybuffer("Go down!\n"));
+});
 
-  updatebutton.addEventListener("click", () => {
-    updateStatus("UPDATE");
-  });
+updatebutton.addEventListener("click", () => {
+  updateStatus("UPDATE");
+});
 
