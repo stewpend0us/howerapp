@@ -123,16 +123,16 @@ function str2arraybuffer(str) {
   return buf;
 }
 
-upbutton.onclick = async (el, ev) => {
+upbutton.addEventListener("click", async (el, ev) => {
   updateStatus("UP");
   await UARTTx.writeValue(str2arraybuffer("Go up!\n"));
-}
+});
 
-downbutton.onclick = async (el, ev) => {
+downbutton.addEventListener("click", async (el, ev) => {
   updateStatus("DOWN");
   await UARTTx.writeValue(str2arraybuffer("Go down!\n"));
-}
+});
 
-updatebutton.onclick = (el, ev) => {
+updatebutton.addEventListener("click", (el, ev) => {
   updateStatus("UPDATE");
-}
+});

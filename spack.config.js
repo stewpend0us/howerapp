@@ -7,13 +7,14 @@ module.exports = config({
     },
     output: {
         path: __dirname + '/build/js/'
-    }/*,
+    },
     options: {
-        minify: true,
+/*        minify: true, */
         jsc: {
-            minify: {
+/*            minify: {
                 compress: true,
-            }
+            } */
+            target: "es3"
         }
-    }*/
+    }
 });
