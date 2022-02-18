@@ -2,6 +2,7 @@
 
 // objects on the page
 const connectbutton = document.getElementById("connectbutton");
+const disconnectbutton = document.getElementById("disconnectbutton");
 const upbutton = document.getElementById("upbutton");
 const downbutton = document.getElementById("downbutton");
 const updatebutton = document.getElementById("updatebutton");
@@ -80,9 +81,9 @@ function askUserToConnect() {
     acceptAllDevices: false,
     filters: [
       { namePrefix: "Itsy" },
-      { namePrefix: "Hower" }
+      { namePrefix: "Hower" },
+      { services: UART.service }
     ],
-    services: [UART.service]
   };
 
   navigator.bluetooth.requestDevice(options)
@@ -119,6 +120,7 @@ function askUserToConnect() {
       connectbutton.classList.add("hidden");
       upbutton.classList.remove("hidden");
       downbutton.classList.remove("hidden");
+      disconnectbutton.classList.remove("hidden");
       return;
     })
     .catch(handleDisconnect);
@@ -135,6 +137,7 @@ function handleDisconnect(ev) {
   connectbutton.classList.remove("hidden");
   upbutton.classList.add("hidden");
   downbutton.classList.add("hidden");
+  disconnectbutton.classList.add("hidden");
 }
 
 function handleUartRx(ev) {
@@ -160,16 +163,19 @@ function str2arraybuffer(str) {
 upbutton.addEventListener("click", () => {
   updateStatus("UP");
   UARTTx.writeValue(str2arraybuffer("Go up!\n"))
-  .catch(updateStatus);
+    .catch(updateStatus);
 });
 
 downbutton.addEventListener("click", () => {
   updateStatus("DOWN");
   UARTTx.writeValue(str2arraybuffer("Go down!\n"))
-  .catch(updateStatus);
+    .catch(updateStatus);
 });
 
 updatebutton.addEventListener("click", () => {
   updateStatus("UPDATE");
 });
 
+disconnectbutton.addEventListener("click", () => {
+  GATTServer?.disconnect();
+})
