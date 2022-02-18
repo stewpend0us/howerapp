@@ -21,13 +21,14 @@ function startup() {
   setOrientation();
 }
 
+*/
 // general stuff
 function updateStatus(e) {
   console.log(e);
   statusmessage.textContent = e.message ?? String(e);
   alert(statusmessage.textContent);
 }
-
+/*
 // change layout depending on orientation
 function setOrientation() {
   let value = "";
@@ -58,7 +59,7 @@ let UARTTx = undefined;
 
 function askUserToConnect() {
   alert("button");
-}/*
+
   puseragent.textContent = window.navigator.userAgent;
   try {
     const options = {
@@ -70,15 +71,15 @@ function askUserToConnect() {
       services: [UART.service]
     };
 
-    BLEDevice = await navigator.bluetooth.requestDevice(options);
-    updateStatus("Connecting...");
-    BLEDevice.addEventListener("gattserverdisconnected", (ev) => handleDisconnect("Device disconnected."));
-    GATTServer = await BLEDevice.gatt.connect();
-    UARTService = await GATTServer.getPrimaryService(UART.service);
-    UARTTx = await UARTService.getCharacteristic(UART.TX);
-    UARTRx = await UARTService.getCharacteristic(UART.RX);
-    let RxNotifications = await UARTRx.startNotifications();
-    RxNotifications.addEventListener("characteristicvaluechanged", handleUartRx);
+//    BLEDevice = await navigator.bluetooth.requestDevice(options);
+//    updateStatus("Connecting...");
+//    BLEDevice.addEventListener("gattserverdisconnected", (ev) => handleDisconnect("Device disconnected."));
+//    GATTServer = await BLEDevice.gatt.connect();
+//    UARTService = await GATTServer.getPrimaryService(UART.service);
+//    UARTTx = await UARTService.getCharacteristic(UART.TX);
+//    UARTRx = await UARTService.getCharacteristic(UART.RX);
+//    let RxNotifications = await UARTRx.startNotifications();
+//    RxNotifications.addEventListener("characteristicvaluechanged", handleUartRx);
   }
   catch (err) {
     handleDisconnect(err);
@@ -91,6 +92,7 @@ function askUserToConnect() {
 
 }
 
+/*
 function handleDisconnect(ev) {
   updateStatus(ev);
   BLEDevice = undefined;
