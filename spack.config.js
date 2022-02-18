@@ -7,7 +7,7 @@ module.exports = config({
     },
     output: {
         path: __dirname + '/build/js/'
-    },
+    }/*,
     options: {
         minify: true,
         jsc: {
@@ -15,5 +15,5 @@ module.exports = config({
                 compress: true,
             }
         }
-    }
+    }*/
 });
