@@ -19,7 +19,7 @@ else {
   window.addEventListener("orientationchange", setOrientation);
 }
 connectbutton.addEventListener("click", askUserToConnect);
-/*
+
 function startup() {
   alert("hi");
   if (navigator.serviceWorker)
@@ -38,7 +38,6 @@ function startup() {
   setOrientation();
 }
 
-*/
 // general stuff
 function updateStatus(e) {
   console.log(e);
@@ -160,25 +159,25 @@ function str2arraybuffer(str) {
   return buf;
 }
 
-upbutton.addEventListener("touchstart", () => {
+upbutton.addEventListener("pointerdown", () => {
   updateStatus("UP");
   UARTTx?.writeValue(str2arraybuffer("Go up!\n"))
     .catch(updateStatus);
 });
 
-upbutton.addEventListener("touchend", () => {
+upbutton.addEventListener("pointerup", () => {
   updateStatus("...");
   UARTTx?.writeValue(str2arraybuffer("no more go up\n"))
     .catch(updateStatus);
 });
 
-downbutton.addEventListener("touchstart", () => {
+downbutton.addEventListener("pointerdown", () => {
   updateStatus("DOWN");
   UARTTx?.writeValue(str2arraybuffer("Go down!\n"))
     .catch(updateStatus);
 });
 
-downbutton.addEventListener("touchend", () => {
+downbutton.addEventListener("pointerup", () => {
   updateStatus("...");
   UARTTx?.writeValue(str2arraybuffer("no more go down\n"))
     .catch(updateStatus);
