@@ -82,7 +82,7 @@ function askUserToConnect() {
     filters: [
       { namePrefix: "Itsy" },
       { namePrefix: "Hower" },
-      { services: UART.service }
+      { services: [UART.service] }
     ],
   };
 
