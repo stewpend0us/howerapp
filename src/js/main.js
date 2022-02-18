@@ -11,7 +11,7 @@ const puseragent = document.getElementById("useragent");
 
 // handlers
 //window.addEventListener("load", startup);
-screen.orientation.addEventListener("change", setOrientation);
+//screen.orientation?.addEventListener("change", setOrientation);
 connectbutton.addEventListener("click", askUserToConnect);
 /*
 function startup() {
