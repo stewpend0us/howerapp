@@ -14,7 +14,7 @@ module.exports = config({
 /*            minify: {
                 compress: true,
             } */
-            target: "es3"
+            target: "es2015"
         }
     }
 });
