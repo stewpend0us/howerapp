@@ -4,13 +4,13 @@ all: build
 
 build: clean
 	cp -r src/ build/
-	npx spack
+#	npx spack
 	workbox generateSW workbox-config.js
 
 install:
 	npm i -D workbox-cli
-	npm i -D @swc/cli @swc/core
-	npm i -D @types/regenerator-runtime
+#	npm i -D @swc/cli @swc/core
+#	npm i -D @types/regenerator-runtime
 
 clean:
 	rm -rf build/
