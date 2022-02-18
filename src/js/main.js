@@ -55,8 +55,9 @@ let UARTService = undefined;
 let UARTRx = undefined;
 let UARTTx = undefined;
 
-async function askUserToConnect() {
+function askUserToConnect() {
   alert("button");
+  /*
   puseragent.textContent = window.navigator.userAgent;
   try {
     const options = {
@@ -82,12 +83,11 @@ async function askUserToConnect() {
     handleDisconnect(err);
     return;
   }
-
   updateStatus("Connected.");
   connectbutton.classList.add("hidden");
   upbutton.classList.remove("hidden");
   downbutton.classList.remove("hidden");
-
+*/
 }
 
 function handleDisconnect(ev) {
