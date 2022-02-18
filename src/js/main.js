@@ -67,7 +67,6 @@ let UARTRx = undefined;
 let UARTTx = undefined;
 
 function askUserToConnect() {
-  alert("button");
 
   puseragent.textContent = window.navigator.userAgent;
   const options = {
@@ -84,36 +83,41 @@ function askUserToConnect() {
       BLEDevice = device;
       updateStatus("Connecting...");
       BLEDevice.addEventListener("gattserverdisconnected", handleDisconnect);
-      BLEDevice.gatt.connect()
-        .then(server => {
-          updateStatus("Connected.");
-          GATTServer = server;
-          GATTServer.getPrimaryService(UART.service)
-            .then(service => {
-              updateStatus("Getting UART Service.");
-              UARTService = service;
-              UARTService.getCharacteristic(UART.TX)
-                .then(char => {
-                  updateStatus("Getting Tx characteristic.");
-                  UARTTx = char;
-                  UARTService.getCharacteristic(UART.RX)
-                    .then(char => {
-                    updateStatus("Getting Rx characteristic.");
-                      UARTRx = char;
-                      UARTRx.startNotifications()
-                        .then(notification => {
-                          updateStatus("Listening for Rx notifications.");
-                          RxNotifications = notification;
-                          RxNotifications.addEventListener("characteristicvaluechanged", handleUartRx);
-                          updateStatus("Connected.");
-                          connectbutton.classList.add("hidden");
-                          upbutton.classList.remove("hidden");
-                          downbutton.classList.remove("hidden");
-                        });
-                    });
-                });
-            });
-        });
+      return BLEDevice.gatt.connect();
+    })
+    .then(server => {
+      updateStatus("Connected.");
+      GATTServer = server;
+      return GATTServer.getPrimaryService(UART.service);
+    })
+    .then(service => {
+      updateStatus("Getting UART Service.");
+      UARTService = service;
+      return UARTService.getCharacteristic(UART.TX);
+    })
+    .then(char => {
+      updateStatus("Getting Tx characteristic.");
+      UARTTx = char;
+      return UARTService.getCharacteristic(UART.RX);
+    })
+    .then(char => {
+      updateStatus("Getting Rx characteristic.");
+      UARTRx = char;
+      return UARTRx.startNotifications();
+    })
+    .then(char => {
+      updateStatus("Listening for Rx notifications.");
+      RxNotifications = char;
+      RxNotifications.addEventListener("characteristicvaluechanged", handleUartRx);
+      RxNotifications.startNotifications();
+      return;
+    })
+    .then(() => {
+      updateStatus("Connected.");
+      connectbutton.classList.add("hidden");
+      upbutton.classList.remove("hidden");
+      downbutton.classList.remove("hidden");
+      return;
     })
     .catch(handleDisconnect);
 }
@@ -132,7 +136,7 @@ function handleDisconnect(ev) {
 }
 
 function handleUartRx(ev) {
-  ev.message = arraybuffer2str(ev.currentTarget.value.buffer);
+  //ev.message = arraybuffer2str(ev.currentTarget.value.buffer);
   updateStatus(ev);
 }
 
