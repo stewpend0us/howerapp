@@ -86,18 +86,23 @@ function askUserToConnect() {
       BLEDevice.addEventListener("gattserverdisconnected", handleDisconnect);
       BLEDevice.gatt.connect()
         .then(server => {
+          updateStatus("Connected.");
           GATTServer = server;
           GATTServer.getPrimaryService(UART.service)
             .then(service => {
+              updateStatus("Getting UART Service.");
               UARTService = service;
               UARTService.getCharacteristic(UART.TX)
                 .then(char => {
+                  updateStatus("Getting Tx characteristic.");
                   UARTTx = char;
                   UARTService.getCharacteristic(UART.RX)
                     .then(char => {
+                    updateStatus("Getting Rx characteristic.");
                       UARTRx = char;
                       UARTRx.startNotifications()
                         .then(notification => {
+                          updateStatus("Listening for Rx notifications.");
                           RxNotifications = notification;
                           RxNotifications.addEventListener("characteristicvaluechanged", handleUartRx);
                           updateStatus("Connected.");
