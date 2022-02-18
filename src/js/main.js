@@ -15,7 +15,7 @@ if (screen.orientation) {
   screen.orientation.addEventListener("change", setOrientation);
 }
 else {
-  window.addEventListener("orientationchange", setOrientationIOS);
+  window.addEventListener("orientationchange", setOrientation);
 }
 connectbutton.addEventListener("click", askUserToConnect);
 /*
@@ -31,25 +31,21 @@ function startup() {
 function updateStatus(e) {
   console.log(e);
   statusmessage.textContent = e.message ?? String(e);
-  alert(statusmessage.textContent);
 }
 
 // change layout depending on orientation
-function setOrientation() {
+function setOrientation(el) {
   let value = "";
-  updateStatus(screen.orientation.angle);
-  switch (screen.orientation.type) {
-    case "landscape-primary": value = "row"; break;
-    case "landscape-secondary": value = "row-reverse"; break;
-    case "portrait-primary": value = "column"; break;
-    case "portrait-secondary": value = "column-reverse"; break;
+  updateStatus(el.angle ?? el);
+  switch (el.angle ?? el) {
+    case 90: value = "row"; break;
+    case -90:
+    case 270: value = "row-reverse"; break;
+    case 0: value = "column"; break;
+    case 180: value = "column-reverse"; break;
     default: console.log(screen.orientation.type); return;
   }
   mainsection.style.flexDirection = value;
-}
-
-function setOrientationIOS() {
-  updateStatus(window.orientation);
 }
 
 // bluetooth stuff
