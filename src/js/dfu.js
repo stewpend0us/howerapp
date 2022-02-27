@@ -2,7 +2,7 @@
 // Copyright (c) 2016 Nordic Semiconductor ASA
 // All rights reserved.
 //
-// Redistribution and use in source and binary forms, with or without modif (ication,
+// Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met{
 //
 //   1. Redistributions of source code must retain the above copyright notice, this
@@ -21,7 +21,7 @@
 //   is used in combination with a processor manufactured by Nordic Semiconductor.
 //
 //   5. Any software provided in binary or object form under this license must not be
-//   reverse engineered, decompiled, modif (ied and/or disassembled.
+//   reverse engineered, decompiled, modified and/or disassembled.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
