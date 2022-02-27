@@ -21,20 +21,20 @@ else {
 connectbutton.addEventListener("click", askUserToConnect);
 
 function startup() {
-  alert("hi");
-  if (navigator.serviceWorker)
+  if ("serviceWorker" in navigator)
   {
-  navigator.serviceWorker?.register("./sw.js");
+    navigator.serviceWorker?.register("./sw.js")
+    .catch(err =>{
+    updateStatus("no service worker :(");
+    });
+  }
+  if ("bluetooth" in navigator)
+  {
   }
   else
   {
-    updateStatus("no service worker :(");
-  }
-  if (!navigator.bluetooth)
-  {
     updateStatus("no bluetooth :(");
   }
-  alert("there");
   setOrientation();
 }
 
