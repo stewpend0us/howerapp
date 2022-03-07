@@ -85,6 +85,7 @@ function askUserToConnect() {
     acceptAllDevices: false,
     filters: [
       { namePrefix: "Itsy" },
+      { namePrefix: "AdaDFU" },
       { namePrefix: "Hower" },
       { services: [UART.service] },
       { services: [DFU.service] }
