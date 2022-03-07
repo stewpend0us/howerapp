@@ -66,10 +66,10 @@ const UART = {
 };
 
 const DFU = {
-  service: "00001530-1212-efde-1523-785feabcd123",
-  control: "00001531-1212-efde-1523-785feabcd123",
-  packet:  "00001532-1212-efde-1523-785feabcd123",
-  version: "00001534-1212-efde-1523-785feabcd123"
+  service: "00001530-1212-efde-1523-785f3713d123",
+  control: "00001531-1212-efde-1523-785f3713d123",
+  packet:  "00001532-1212-efde-1523-785f3713d123",
+  version: "00001534-1212-efde-1523-785f3713d123"
 };
 
 let BLEDevice = undefined;
