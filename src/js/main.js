@@ -63,7 +63,13 @@ const UART = {
   service: "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
   TX: "6e400002-b5a3-f393-e0a9-e50e24dcca9e",
   RX: "6e400003-b5a3-f393-e0a9-e50e24dcca9e",
-  //  descriptor:0x2901
+};
+
+const DFU = {
+  service: "00001530-1212-efde-1523-785feabcd123",
+  control: "00001531-1212-efde-1523-785feabcd123",
+  packet:  "00001532-1212-efde-1523-785feabcd123",
+  version: "00001534-1212-efde-1523-785feabcd123"
 };
 
 let BLEDevice = undefined;
@@ -80,7 +86,8 @@ function askUserToConnect() {
     filters: [
       { namePrefix: "Itsy" },
       { namePrefix: "Hower" },
-      { services: [UART.service] }
+      { services: [UART.service] },
+      { services: [DFU.service] }
     ],
   };
 

@@ -55,7 +55,7 @@
 */
 
 /* Class to handle upload of a new hex image to the device. */
-function Dfu(dfu_transport, connect_delay) {
+function Dfu(dfu_transport) {
 	/*
 	Initializes the dfu upgrade, unpacks zip and registers callbacks.
 
@@ -87,7 +87,7 @@ function Dfu(dfu_transport, connect_delay) {
 					})
 					.then(data => {
 						this.files[name][type] = data;
-						if (type == "dat_file")
+						if (type === "dat_file")
 							this.total_size += data.size
 					});
 			}
@@ -110,7 +110,7 @@ function Dfu(dfu_transport, connect_delay) {
 
 Dfu.prototype._dfu_send_image = function (firmware) {
 	//	time.sleep(this.connect_delay);
-	this.dfu_transport.open();
+	//this.dfu_transport.open();
 
 	start_time = Date.now();
 
