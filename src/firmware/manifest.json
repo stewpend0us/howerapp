@@ -1,0 +1,18 @@
+{
+    "manifest": {
+        "application": {
+            "bin_file": "bleuart.ino.bin",
+            "dat_file": "bleuart.ino.dat",
+            "init_packet_data": {
+                "application_version": 4294967295,
+                "device_revision": 65535,
+                "device_type": 82,
+                "firmware_crc16": 64553,
+                "softdevice_req": [
+                    182
+                ]
+            }
+        },
+        "dfu_version": 0.5
+    }
+}
