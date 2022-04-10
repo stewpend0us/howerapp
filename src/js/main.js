@@ -103,7 +103,6 @@ function connectTo(device, obj, result) {
 
 let BLEDevice = undefined;
 let uart = undefined;
-let dfu_adapter = undefined;
 let dfuObject = undefined;
 
 function askUserToConnect() {
@@ -143,6 +142,7 @@ function askUserToConnect() {
 	})
 	.then( result => {
 		console.log(result);
+		result.go();
 	})
 	.catch(updateStatus);
 }
@@ -200,7 +200,6 @@ function handleDisconnect(ev) {
 	BLEDevice = undefined;
 	GATTServer = undefined;
 	uart = undefined;
-	dfu_adapter = undefined;
 
 	connectbutton.classList.remove("hidden");
 	upbutton.classList.add("hidden");
@@ -295,29 +294,7 @@ function Dfu(adapter) {
 	this.prn = 0;
 	this.adapter = adapter;
 
-	fetch("/firmware/manifest.json")
-		.then(response => {
-			return response.json();
-		})
-		.then(manifest => {
-			console.log(manifest);
-			this.manifest = manifest.manifest;
-			this.files = {};
 
-			Promise.allSettled([
-				this.get_files("softdevice_bootloader"),
-				this.get_files("softdevice"),
-				this.get_files("bootloader"),
-				this.get_files("application"),
-			]);
-		})
-		.catch(error => {
-			console.log("error fetching or processing manifest.json")
-			console.log(error);
-		})
-
-	adapter.control.addEventListener(EVENT, this.handleControlNotification);
-	adapter.control.startNotifications();
 }
 
 Dfu.RETRIES_NUMBER = 3;
@@ -363,6 +340,42 @@ Dfu.EXT_ERROR_CODE = [
 	"The requested firmware to update was already present on the system.",
 ];
 
+Dfu.prototype.go = function() {
+
+	return fetch("/firmware/manifest.json")
+		.then(response => {
+			return response.json();
+		})
+		.then(manifest => {
+			console.log(manifest);
+			this.manifest = manifest.manifest;
+			this.files = {};
+
+			return Promise.allSettled([
+				this.get_files("softdevice_bootloader"),
+				this.get_files("softdevice"),
+				this.get_files("bootloader"),
+				this.get_files("application"),
+			]);
+		})
+		.then(r => {
+			this.adapter.control.addEventListener(EVENT, this.handleControlNotification);
+			this.adapter.control.startNotifications();
+		})
+		.then(r => {
+			this.dfu_send_images();
+		})
+		.catch(error => {
+			console.log("error fetching or processing manifest.json")
+			console.log(error);
+		});
+}
+
+Dfu.prototype.handleControlNotification = function (ev){
+	updateStatus("control notification:");
+	updateStatus(ev);
+}
+
 Dfu.prototype.get_files = function (name) {
 	return Promise.all([
 		this.get_file(name, "bin_file"),
@@ -400,7 +413,7 @@ Dfu.prototype.get_file = function (name, type) {
 }
 
 Dfu.prototype._dfu_send_image = function (firmware) {
-	start_time = Date.now();
+	let start_time = Date.now();
 
 	updateStatus("Sending init packet...");
 	this.send_init_packet(this.files[firmware].dat_file);
@@ -529,7 +542,7 @@ Dfu.prototype.select_object = function (object_type) {
 	let byteView = new Uint8Array(buf, 0, 2);
 	byteView[0] = Dfu.OP_CODE.ReadObject;
 	byteView[1] = object_type;
-	this.dfu_adapter.write_control_point(buf);
+	this.write_control_point(buf);
 	response = this.get_response(Dfu.OP_CODE.ReadObject); // response is array buffer?
 	resp =new Uint32Array(response);
 	max_size = resp[0];
@@ -583,13 +596,11 @@ Dfu.prototype.connect = function() {
 
 
 Dfu.prototype.write_control_point = function(data) {
-	this.adapter.control.writeValue(data)
-		.catch(updateStatus);
+	return this.adapter.control.writeValue(data);
 }
 
 Dfu.prototype.write_data_point = function(data) {
-	this.adapter.packet.writeValue(data)
-		.catch(updateStatus);
+	return this.adapter.packet.writeValue(data);
 }
 
 Dfu.prototype.on_notification = function(ble_conn_handle, uuid, data) {
