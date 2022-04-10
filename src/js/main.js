@@ -64,58 +64,90 @@ const UART = {
 	name: "UART",
 	service: "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
 	TX: "6e400002-b5a3-f393-e0a9-e50e24dcca9e",
-	RX: "6e400003-b5a3-f393-e0a9-e50e24dcca9e",
+	RX: "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
 };
+let UARTble = {}; 
 
 const DFU = {
 	name: "DFU",
 	service: "00001530-1337-eabb-2845-bee366ecee5a",
-	control: "00001531-1337-eabb-2845-bee366ecee5a",
+	control:"00001531-1337-eabb-2845-bee366ecee5a",
 	packet: "00001532-1337-eabb-2845-bee366ecee5a",
-	version: "00001534-1337-eabb-2845-bee366ecee5a"
+	version:"00001534-1337-eabb-2845-bee366ecee5a"
 };
+let DFUble = {};
 
-function connectTo(obj) {
-	let result = {
-		name: obj.name,
-	};
-	let promises = [];
-	GATTServer?.getPrimaryService(obj.service)
-		.then(service => {
-			updateStatus("Got " + obj.name);
-			result.service = service;
-			for (const prop in obj) {
-				if (prop === "service" || prop === "name") {
-					continue;
-				}
-				promises.push(service.getCharacteristic(obj[prop])
-					.then(char => {
-						updateStatus("Got " + obj.name + "." + prop + " characteristic");
-						result[prop] = char;
-					})
-					.catch(error => {
-						updateStatus("No " + obj.name + "." + prop + " characteristic?");
-						updateStatus(error);
-					}));
+function connectTo(device, obj, result) {
+	return device.getPrimaryService(obj.service)
+	.then ( service => {
+		result.name = obj.name;
+		result.service = service;
+		let p = [];
+		for (const key of Object.keys(obj))
+		{
+			if (key === "name" || key === "service")
+			{
+				continue;
 			}
-			//Promise.allSettled(promises);
-			return result;
-		})
-		.catch(error => {
-			updateStatus("no " + obj.name + " service?");
-			updateStatus(error);
-		});
+			p.push(service.getCharacteristic(obj[key])
+			.then(ch => {
+				result[key] = ch;
+			}));
+		}
+		return Promise.allSettled(p);
+	})
+	.then(r => {
+		return result;
+	})
 }
 
 let BLEDevice = undefined;
-let GATTServer = undefined;
 let uart = undefined;
 let dfu_adapter = undefined;
 let dfuObject = undefined;
 
 function askUserToConnect() {
+	const options = {
+		acceptAllDevices: false,
+		filters: [
+			{ namePrefix: "Itsy" },
+			{ namePrefix: "AdaDFU" },
+			{ namePrefix: "Hower" },
+			{ services: [UART.service] },
+			{ services: [DFU.service] },
+		],
+	};
 
-	puseragent.textContent = window.navigator.userAgent;
+
+	navigator.bluetooth?.requestDevice(options)
+	.then( device => {
+		BLEDevice = device;
+		BLEDevice.addEventListener("gattserverdisconnected", handleDisconnect);
+		return device.gatt.connect();
+	})
+	.then( device => {
+		return connectTo(BLEDevice.gatt, UART, UARTble);
+	})
+	.then( result => {
+		updateStatus("Connected to UART.");
+		connectbutton.classList.add("hidden");
+		upbutton.classList.remove("hidden");
+		downbutton.classList.remove("hidden");
+		disconnectbutton.classList.remove("hidden");
+	})
+	.catch( result => {
+		return connectTo(BLEDevice.gatt, DFU, DFUble);
+	})
+	.then( result => {
+		return new Dfu(DFUble);
+	})
+	.then( result => {
+		console.log(result);
+	})
+	.catch(updateStatus);
+}
+function askUserToConnect2() {
+
 	const options = {
 		acceptAllDevices: false,
 		filters: [
@@ -130,9 +162,8 @@ function askUserToConnect() {
 
 	navigator.bluetooth?.requestDevice(options)
 		.then(device => {
-			BLEDevice = device;
+//			BLEDevice = device;
 			updateStatus("Connected to " + device.name);
-			BLEDevice.addEventListener("gattserverdisconnected", handleDisconnect);
 			return BLEDevice.gatt.connect();
 		})
 		.then(server => {
@@ -147,11 +178,6 @@ function askUserToConnect() {
 			return uart;
 		})
 		.then((uart) => {
-			updateStatus("Connected.");
-			connectbutton.classList.add("hidden");
-			upbutton.classList.remove("hidden");
-			downbutton.classList.remove("hidden");
-			disconnectbutton.classList.remove("hidden");
 		})
 		.catch(error => {
 			updateStatus(error);
