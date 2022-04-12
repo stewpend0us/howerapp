@@ -66,39 +66,37 @@ const UART = {
 	TX: "6e400002-b5a3-f393-e0a9-e50e24dcca9e",
 	RX: "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
 };
-let UARTble = {}; 
+let UARTble = {};
 
 const DFU = {
 	name: "DFU",
 	service: "00001530-1337-eabb-2845-bee366ecee5a",
-	control:"00001531-1337-eabb-2845-bee366ecee5a",
+	control: "00001531-1337-eabb-2845-bee366ecee5a",
 	packet: "00001532-1337-eabb-2845-bee366ecee5a",
-	version:"00001534-1337-eabb-2845-bee366ecee5a"
+	version: "00001534-1337-eabb-2845-bee366ecee5a"
 };
 let DFUble = {};
 
 function connectTo(device, obj, result) {
 	return device.getPrimaryService(obj.service)
-	.then ( service => {
-		result.name = obj.name;
-		result.service = service;
-		let p = [];
-		for (const key of Object.keys(obj))
-		{
-			if (key === "name" || key === "service")
-			{
-				continue;
+		.then(service => {
+			result.name = obj.name;
+			result.service = service;
+			let p = [];
+			for (const key of Object.keys(obj)) {
+				if (key === "name" || key === "service") {
+					continue;
+				}
+				p.push(service.getCharacteristic(obj[key])
+					.then(ch => {
+						result[key] = ch;
+					}));
 			}
-			p.push(service.getCharacteristic(obj[key])
-			.then(ch => {
-				result[key] = ch;
-			}));
-		}
-		return Promise.allSettled(p);
-	})
-	.then(r => {
-		return result;
-	})
+			return Promise.allSettled(p);
+		})
+		.then(r => {
+			return result;
+		})
 }
 
 let BLEDevice = undefined;
@@ -119,86 +117,43 @@ function askUserToConnect() {
 
 
 	navigator.bluetooth?.requestDevice(options)
-	.then( device => {
-		BLEDevice = device;
-		BLEDevice.addEventListener("gattserverdisconnected", handleDisconnect);
-		return device.gatt.connect();
-	})
-	.then( device => {
-		return connectTo(BLEDevice.gatt, UART, UARTble);
-	})
-	.then( result => {
-		updateStatus("Connected to UART.");
-		connectbutton.classList.add("hidden");
-		upbutton.classList.remove("hidden");
-		downbutton.classList.remove("hidden");
-		disconnectbutton.classList.remove("hidden");
-	})
-	.catch( result => {
-		return connectTo(BLEDevice.gatt, DFU, DFUble);
-	})
-	.then( result => {
-		return new Dfu(DFUble);
-	})
-	.then( result => {
-		console.log(result);
-		result.go();
-	})
-	.catch(updateStatus);
-}
-function askUserToConnect2() {
-
-	const options = {
-		acceptAllDevices: false,
-		filters: [
-			{ namePrefix: "Itsy" },
-			{ namePrefix: "AdaDFU" },
-			{ namePrefix: "Hower" },
-			{ services: [UART.service] },
-			{ services: [DFU.service] },
-		],
-	};
-
-
-	navigator.bluetooth?.requestDevice(options)
 		.then(device => {
-//			BLEDevice = device;
-			updateStatus("Connected to " + device.name);
-			return BLEDevice.gatt.connect();
+			BLEDevice = device;
+			//BLEDevice.addEventListener("gattserverdisconnected", handleDisconnect);
+			return device.gatt.connect();
 		})
-		.then(server => {
-			updateStatus("Connected to Gatt.");
-			GATTServer = server;
-			return server;
+		.then(device => {
+			return connectTo(BLEDevice.gatt, UART, UARTble);
 		})
-		.then(server => {
-			uart = connectTo(UART);
-			uart.RX.addEventListener(EVENT, handleUartRx);
-			uart.RX.startNotifications();
-			return uart;
-		})
-		.then((uart) => {
-		})
-		.catch(error => {
-			updateStatus(error);
-			dfu_adapter = connectTo(DFU);
-			dfuObject = new Dfu(dfu_adapter);
-			return dfu_adapter;
-		})
-		.then(dfu_adapter => {
+		.then(result => {
+			updateStatus("Connected to UART.");
 			connectbutton.classList.add("hidden");
-			updatebutton.classList.remove("hidden");
+			upbutton.classList.remove("hidden");
+			downbutton.classList.remove("hidden");
+			disconnectbutton.classList.remove("hidden");
 		})
 		.catch(error => {
-			updateStatus("welp that's not good.");
-			updateStatus(error);
-		});
+			console.log(error);
+			if (BLEDevice.gatt.connected)
+				return connectTo(BLEDevice.gatt, DFU, DFUble);
+			return BLEDevice.gatt.connect()
+				.then(() => {
+					return connectTo(BLEDevice.gatt, DFU, DFUble);
+				});
+		})
+		.then(result => {
+			return new Dfu(DFUble);
+		})
+		.then(result => {
+			console.log(result);
+			return result.go();
+		})
+		.catch(updateStatus);
 }
 
 function handleDisconnect(ev) {
 	updateStatus("Disconnect Event");
 	BLEDevice = undefined;
-	GATTServer = undefined;
 	uart = undefined;
 
 	connectbutton.classList.remove("hidden");
@@ -257,7 +212,7 @@ updatebutton.addEventListener("click", () => {
 });
 
 disconnectbutton.addEventListener("click", () => {
-	GATTServer?.disconnect();
+	BLEDevice?.gatt.disconnect();
 })
 
 // taken from here:
@@ -276,7 +231,7 @@ let crc32 = (() => {
 	}
 
 	// calculate the crc
-	function crc_fun(str, crcIn=0) {
+	function crc_fun(str, crcIn = 0) {
 		let crc = crcIn ^ (-1);
 		for (let i = 0; i < str.length; i++) {
 			crc = (crc >>> 8) ^ crcTable[(crc ^ str.charCodeAt(i)) & 0xFF];
@@ -286,6 +241,15 @@ let crc32 = (() => {
 
 	return crc_fun;
 })(); // evaluate the lambda and return the inner function (only build the table once)
+
+function for_loop(init, cond, update, do_the_thing) {
+	function loop(i) {
+		if (!cond(i))
+			return;
+		return do_the_thing(i).then(loop(update(i)));
+	}
+	return loop(init);
+}
 
 /// Dfu class:
 function Dfu(adapter) {
@@ -340,7 +304,13 @@ Dfu.EXT_ERROR_CODE = [
 	"The requested firmware to update was already present on the system.",
 ];
 
-Dfu.prototype.go = function() {
+Dfu.prototype.handleControlNotification = function(stuff)
+{
+	updateStatus('control notification!');
+	console.log(stuff);
+}
+
+Dfu.prototype.go = function () {
 
 	return fetch("/firmware/manifest.json")
 		.then(response => {
@@ -350,7 +320,9 @@ Dfu.prototype.go = function() {
 			console.log(manifest);
 			this.manifest = manifest.manifest;
 			this.files = {};
-
+			return this.open();
+		})
+		.then(() => {
 			return Promise.allSettled([
 				this.get_files("softdevice_bootloader"),
 				this.get_files("softdevice"),
@@ -358,20 +330,20 @@ Dfu.prototype.go = function() {
 				this.get_files("application"),
 			]);
 		})
+//		.then(r => {
+//			this.adapter.control.addEventListener(EVENT, this.handleControlNotification);
+//			this.adapter.control.startNotifications();
+//		})
 		.then(r => {
-			this.adapter.control.addEventListener(EVENT, this.handleControlNotification);
-			this.adapter.control.startNotifications();
-		})
-		.then(r => {
-			this.dfu_send_images();
+			return this.dfu_send_images();
 		})
 		.catch(error => {
 			console.log("error fetching or processing manifest.json")
-			console.log(error);
+			console.error(error);
 		});
 }
 
-Dfu.prototype.handleControlNotification = function (ev){
+Dfu.prototype.handleControlNotification = function (ev) {
 	updateStatus("control notification:");
 	updateStatus(ev);
 }
@@ -421,12 +393,12 @@ Dfu.prototype._dfu_send_image = function (firmware) {
 	updateStatus("Sending firmware file...");
 	this.send_firmware(this.files[firmware].bin_file);
 
-	end_time = Date.now();
+	let end_time = Date.now();
 	updateStatus(`Image sent in ${end_time - start_time}`);
 }
 
 Dfu.prototype.send_init_packet = function (init_packet) { // init_packet is a Blob
-	function try_to_recover() {
+	function try_to_recover(response) {
 		if (response.offset == 0 || response.offset > init_packet.size) {
 			// There is no init packet or present init packet is too long.
 			return false;
@@ -454,34 +426,34 @@ Dfu.prototype.send_init_packet = function (init_packet) { // init_packet is a Bl
 
 	}
 
-	response = this.select_command();
-	if (init_packet.size <= response.max_size)
-		throw "Init command is too long";
+	return this.select_command().then(response => {
+		if (init_packet.size <= response.max_size)
+			throw "Init command is too long";
 
-	if (try_to_recover())
-		return;
-
-	for (r in range(Dfu.RETRIES_NUMBER)) {
-		try {
-			this.create_command(init_packet.size)
-			this.stream_data(init_packet)
-			this.execute()
+		if (try_to_recover(response))
 			return;
+
+		for (r in range(Dfu.RETRIES_NUMBER)) {
+			try {
+				this.create_command(init_packet.size)
+				this.stream_data(init_packet)
+				this.execute()
+				return;
+			}
+			finally { }
 		}
-		finally { }
-	}
-	throw "Failed to send init packet";
+		throw "Failed to send init packet";
+	});
 }
 
 Dfu.prototype.send_firmware = function (firmware) { //firmware is a Blob
-	function try_to_recover() {
+	function try_to_recover(response) {
 		if (response.offset == 0) {
 			// Nothing to recover
 			return;
 		}
 
 		expected_crc = crc32(firmware.slice(0, response.offset));
-		expected_crc = crc();
 		remainder = response.offset % response.max_size;
 
 		if (expected_crc != response.crc) {
@@ -501,7 +473,7 @@ Dfu.prototype.send_firmware = function (firmware) { //firmware is a Blob
 			catch (error) {
 				// Remove corrupted data.
 				response.offset -= remainder;
-				response.crc = crc32(firmware.slice(0,response.offset));
+				response.crc = crc32(firmware.slice(0, response.offset));
 				return;
 			}
 		}
@@ -509,30 +481,36 @@ Dfu.prototype.send_firmware = function (firmware) { //firmware is a Blob
 		this.execute();
 		//	this._send_event(event_type=DfuEvent.PROGRESS_EVENT, progress=response.offset);
 	}
-	response = this.select_data();
-	try_to_recover();
+	return this.select_data()
+		.then(response => {
 
-	for (i in range(response.offset, firmware.size, response.max_size)) {
-		data = firmware.slice(i, i + response.max_size);
-		for (r in range(Dfu.RETRIES_NUMBER)) {
-			try {
-				this.create_data(data.size);
-				response.crc = this.stream_data(data, response.crc, i);
-				this.execute();
+			try_to_recover(response);
+
+			for (i in range(response.offset, firmware.size, response.max_size)) {
+				data = firmware.slice(i, i + response.max_size);
+				for (r in range(Dfu.RETRIES_NUMBER)) {
+					try {
+						this.create_data(data.size);
+						response.crc = this.stream_data(data, response.crc, i)
+							.then(crc => {
+								response.crc = crc;
+							})
+							.then(this.execute);
+					}
+					finally { }
+					break;
+				}
+				throw "Failed to send firmware";
+				//	this._send_event(event_type=DfuEvent.PROGRESS_EVENT, progress=data.size)
 			}
-			finally { }
-			break;
-		}
-		throw "Failed to send firmware";
-		//	this._send_event(event_type=DfuEvent.PROGRESS_EVENT, progress=data.size)
-	}
+		});
 }
 
 Dfu.prototype.select_command = function () {
 	return this.select_object(0x01);
 }
 
-Dfu.prototype._select_data = function () {
+Dfu.prototype.select_data = function () {
 	return this.select_object(0x02);
 }
 
@@ -542,15 +520,17 @@ Dfu.prototype.select_object = function (object_type) {
 	let byteView = new Uint8Array(buf, 0, 2);
 	byteView[0] = Dfu.OP_CODE.ReadObject;
 	byteView[1] = object_type;
-	this.write_control_point(buf);
-	response = this.get_response(Dfu.OP_CODE.ReadObject); // response is array buffer?
-	resp =new Uint32Array(response);
-	max_size = resp[0];
-	offset = resp[1];
-	crc = resp[2];
-//	(max_size, offset, crc) = struct.unpack('<III', bytearray(response)); // "<III" little endian 3x unsigned int
-	console.log(`BLE: Object selected: max_size:${max_size} offset:${offset} crc:${crc}`);
-	return { max_size: max_size, offset: offset, crc: crc };
+	return this.write_control_point(buf)
+		.then(this.get_response(Dfu.OP_CODE.ReadObject))
+		.then(response => {
+			resp = new Uint32Array(response);
+			max_size = resp[0];
+			offset = resp[1];
+			crc = resp[2];
+			//	(max_size, offset, crc) = struct.unpack('<III', bytearray(response)); // "<III" little endian 3x unsigned int
+			console.log(`BLE: Object selected: max_size:${max_size} offset:${offset} crc:${crc}`);
+			return { max_size: max_size, offset: offset, crc: crc };
+		});
 }
 
 Dfu.prototype.dfu_send_images = function () {
@@ -580,99 +560,104 @@ Dfu.prototype.dfu_send_images = function () {
 
 Dfu.prototype.dfu_get_total_size = () => this.total_size;
 
-Dfu.prototype.init = function() {
+Dfu.prototype.init = function () {
 	this.evt_sync = EvtSync("connected", "disconnected");
-	this.notifications_q = queue.Queue();
+	//	this.notifications_q = queue.Queue();
 	this.packet_size = this.att_mtu - 3; // look into "L2CAP" and "MTU"
 	// adapter
 	this.observer_register(this);
 	this.driver.observer_register(this);
 }
 
-Dfu.prototype.connect = function() {
+Dfu.prototype.connect = function () {
 	console.log("BLE: Enabling Notifications");
 	this.enable_notification(uuid = DFUCP_UUID);
 }
 
 
-Dfu.prototype.write_control_point = function(data) {
-	return this.adapter.control.writeValue(data);
+Dfu.prototype.write_control_point = function (data) {
+	return this.adapter.control.writeValueWithResponse(data);
 }
 
-Dfu.prototype.write_data_point = function(data) {
-	return this.adapter.packet.writeValue(data);
+Dfu.prototype.write_data_point = function (data) {
+	return this.adapter.packet.writeValueWithResponse(data);
 }
 
-Dfu.prototype.on_notification = function(ble_conn_handle, uuid, data) {
-	if (this.conn_handle != conn_handle)
-		return;
-	if (DFUCP_UUID.value != uuid.value)
-		return;
-	this.notifications_q.put(data);
+//Dfu.prototype.on_notification = function(ble_conn_handle, uuid, data) {
+//	if (this.conn_handle != conn_handle)
+//		return;
+//	if (DFUCP_UUID.value != uuid.value)
+//		return;
+////	this.notifications_q.put(data);
+//}
+
+Dfu.prototype.open = function () {
+	return this.set_prn();
 }
 
-Dfu.prototype.open = function() {
-	this.set_prn();
-}
-
-Dfu.prototype.set_prn = function() {
+Dfu.prototype.set_prn = function () {
 	console.log(`BLE: Set Packet Receipt Notification ${this.prn}`);
 	let buf = new ArrayBuffer(1 + 2);
-	let byteView = new Uint8Array(buf, 0, 1);
-	let shortView = new Uint16Array(buf, 1, 1);
-	byteView[0] = Dfu.OP_CODE.SetPRN;
-	shortView[0] = prn;
+	let view = new DataView(buf);
+	view.setUint8(0, Dfu.OP_CODE.SetPRN, true);
+	view.setUint16(1, this.prn, true);
 
 	//    this.write_control_point([Dfu.OP_CODE.SetPRN] + list(struct.pack("<H", this.prn))); // "<H" -> little endian unsigned short (2 bytes)
-	this.write_control_point(buf);
-	this.get_response(Dfu.OP_CODE.SetPRN);
+	return this.write_control_point(buf)
+	.then(this.get_response(Dfu.OP_CODE.SetPRN))
+	.then(resp => {
+		updateStatus("BLE: Set Packet Receipt Notification complete");
+		console.log(resp);
+	});
 }
 
-Dfu.prototype.create_command= function(size) {
+Dfu.prototype.create_command = function (size) {
 	this.create_object(0x01, size);
 }
 
-Dfu.prototype.create_data = function(size) {
+Dfu.prototype.create_data = function (size) {
 	this.create_object(0x02, size);
 }
 
-Dfu.prototype.create_object = function(object_type, size) {
+Dfu.prototype.create_object = function (object_type, size) {
 	let buf = new ArrayBuffer(2 + 4);
-	let byteView = new Uint8Array(buf, 0, 2);
-	let longView = new Uint32Array(buf, 2, 1);
-	byteView[0] = Dfu.OP_CODE.CreateObject;
-	byteView[1] = object_type;
-	longView[0] = size;
-	this.adapter.control.writeValue(buf);
+	let view = new DataView(buf);
+	view.setUint8(0, Dfu.OP_CODE.CreateObject, true);
+	view.setUint8(1, object_type, true);
+	view.setUint32(2, size, true);
 	//	this.write_control_point([Dfu.OP_CODE.CreateObject, object_type] + list(struct.pack("<L", size))); // "<L" -> little endian unsignedlong (4 bytes)
-	this.get_response(Dfu.OP_CODE.CreateObject);
+	return this.write_control_point(buf)
+		.then(this.get_response(Dfu.OP_CODE.CreateObject));
 }
 
-Dfu.prototype.calculate_checksum = function() {
+Dfu.prototype.calculate_checksum = function () {
 	let buf = new ArrayBuffer(1);
-	let byteView = new Uint8Array(buf, 0, 1);
-	byteView[0] = Dfu.OP_CODE.CalcChecSum;
-	this.write_control_point(buf);
-	response = this.get_response(Dfu.OP_CODE.CalcChecSum);
-	resp =new Uint32Array(response);
-	offset = resp[0];
-	crc = resp[1];
+	let view = new DataView(buf);
+	view.setUint8(0, Dfu.OP_CODE.CalcChecSum, true);
 
-//	(offset, crc) = struct.unpack("<II", bytearray(response)); // "<II" little endian 2x unsigned int (4 bytes)
-	return { offset: offset, crc: crc };
+	return this.write_control_point(buf)
+		.then(this.get_response(Dfu.OP_CODE.CalcChecSum))
+		.then(resp => {
+			resp = new Uint32Array(response);
+			offset = resp[0];
+			crc = resp[1];
+
+			//	(offset, crc) = struct.unpack("<II", bytearray(response)); // "<II" little endian 2x unsigned int (4 bytes)
+			return { offset: offset, crc: crc };
+		});
 }
 
-Dfu.prototype.execute  = function() {
+Dfu.prototype.execute = function () {
 	let buf = new ArrayBuffer(1);
-	let byteView = new Uint8Array(buf, 0, 1);
-	byteView[0] = Dfu.OP_CODE.Execute;
-	this.write_control_point(buf);
-	this.get_response(Dfu.OP_CODE.Execute);
+	let view = new DataView(buf);
+	view.setUint8(0, Dfu.OP_CODE.Execute, true);
+	return this.write_control_point(buf)
+		.then(this.get_response(Dfu.OP_CODE.Execute))
 }
 
-Dfu.prototype.get_checksum_response = function() {
-	response = this.get_response(Dfu.OP_CODE.CalcChecSum);
-	resp =new Uint32Array(response);
+Dfu.prototype.get_checksum_response = function (response) {
+	resp = this.get_response(Dfu.OP_CODE.CalcChecSum)(response);
+	resp = new Uint32Array(response);
 	offset = resp[0];
 	crc = resp[1];
 
@@ -680,9 +665,10 @@ Dfu.prototype.get_checksum_response = function() {
 	return { offset: offset, crc: crc };
 }
 
-Dfu.prototype.stream_data = function(data, crc = 0, offset = 0) {// data is Blob
+Dfu.prototype.stream_data = function (data, crc = 0, offset = 0) {// data is Blob
 	console.log("BLE: Streaming Data: len:{0} offset:{1} crc:0x{2:08X}".format(data.size, offset, crc));
-	function validate_crc() {
+
+	function validate_crc(response) {
 		if (crc != response.crc)
 			throw `Failed CRC validation.\nExpected: ${crc} Received: ${response.crc}.`;
 		if (offset != response.offset)
@@ -690,55 +676,91 @@ Dfu.prototype.stream_data = function(data, crc = 0, offset = 0) {// data is Blob
 	}
 
 	current_prn = 0;
-	for (i in range(0, data.size, this.dfu_packet_size)) {
+	for_loop(0, i => i < this.data.size, i => i++, i => {
+
 		to_transmit = data.slice(i, i + this.dfu_packet_size);
-		// TODO ArrayBuffer thing
-		this.write_data_point(list(to_transmit));
-		crc = crc32(to_transmit, crc);
-		offset += to_transmit.size;
-		current_prn += 1;
-		if (this.prn == current_prn) {
-			current_prn = 0;
-			response = this.get_checksum_response();
-			validate_crc();
-		}
-	}
+		return this.write_data_point(to_transmit)
+			.then(result => {
+				crc = crc32(to_transmit, crc);
+				offset += to_transmit.size;
+				current_prn += 1;
+				if (this.prn == current_prn) {
+					current_prn = 0;
+					response = this.get_checksum_response(result); // valid..not a promise
+					validate_crc(response);
+				}
+			});
+	});
+//	(function loop(i) {
+//		if (i >= this.data.size)
+//			return;
+//		to_transmit = data.slice(i, i + this.dfu_packet_size);
+//		this.write_data_point(to_transmit)
+//			.then(result => {
+//				crc = crc32(to_transmit, crc);
+//				offset += to_transmit.size;
+//				current_prn += 1;
+//				if (this.prn == current_prn) {
+//					current_prn = 0;
+//					response = this.get_checksum_response(result);
+//					validate_crc(response);
+//				}
+//				return loop(i + 1);
+//			});
+//	})(0);
+	//	for (i in range(0, data.size, this.dfu_packet_size)) {
+	//		to_transmit = data.slice(i, i + this.dfu_packet_size);
+	//		// TODO this probably needs to be recursive now....
+	//		this.write_data_point(to_transmit)
+	//			.then(response => {
+	//				crc = crc32(to_transmit, crc);
+	//				offset += to_transmit.size;
+	//				current_prn += 1;
+	//				if (this.prn == current_prn) {
+	//					current_prn = 0;
+	//					response = this.get_checksum_response(result);
+	//					if (crc != response.crc)
+	//						throw `Failed CRC validation.\nExpected: ${crc} Received: ${response.crc}.`;
+	//					if (offset != response.offset)
+	//						throw `Failed offset validation.\nExpected: ${offset} Received: ${response.offset}.`;
+	//				}
+	//			});
+	//	}
 
-	response = this.calculate_checksum();
-	validate_crc();
-
-	return crc;
+	return this.calculate_checksum()
+		.then(validate_crc)
+		.then(() => { return crc; });
 }
 
-Dfu.prototype.get_response = function(operation) {
+Dfu.prototype.get_response = function (operation) {
 	function get_dict_key(dictionary, value) {
 		return Object.keys(dictionary).find(key => dictionary[key] === value);
 	}
+console.log(`creating handle_response for ${operation}`);
+	function handle_response(resp) {
+		console.log("handling response:");
+		console.log(resp);
+		if (resp[0] != Dfu.OP_CODE.Response)
+			throw `No Response: 0x${resp[0].toString(16)}`;
 
-	//    try
-	resp = this.dfu_notifications_q.get(timeout = 20)
-	//    catch (queue.Empty)
-	//        raise NordicSemiException("Timeout: operation - {}".format(get_dict_key(Dfu.OP_CODE,operation)))
+		if (resp[1] != operation)
+			throw `Unexpected Executed OP_CODE.\nExpected: 0x${operation.toString(16)} Received: 0x${resp[1].toString(16)}`;
 
-	if (resp[0] != Dfu.OP_CODE.Response)
-		throw `No Response: 0x${resp[0].toString(16)}`;
-
-	if (resp[1] != operation)
-		throw `Unexpected Executed OP_CODE.\nExpected: 0x${operation.toString(16)} Received: 0x${resp[1].toString(16)}`;
-
-	if (resp[2] == DfuTransport.RES_CODE.Success) {
-		return resp.slice(3);
-	}
-	else if (resp[2] == DfuTransport.RES_CODE.ExtendedError) {
-		try {
-			data = DfuTransport.EXT_ERROR_CODE[resp[3]];
+		if (resp[2] == DfuTransport.RES_CODE.Success) {
+			return resp.slice(3);
 		}
-		catch (err) {
-			data = `Unsupported extended error type ${resp[3]}`;
+		else if (resp[2] == DfuTransport.RES_CODE.ExtendedError) {
+			try {
+				data = DfuTransport.EXT_ERROR_CODE[resp[3]];
+			}
+			catch (err) {
+				data = `Unsupported extended error type ${resp[3]}`;
+			}
+			throw `Extended Error 0x{resp[3].toString(16)}: ${data}`;
 		}
-		throw `Extended Error 0x{resp[3].toString(16)}: ${data}`;
+		else {
+			throw `Response Code ${get_dict_key(DfuTransport.RES_CODE, resp[2])}`;
+		}
 	}
-	else {
-		throw `Response Code ${get_dict_key(DfuTransport.RES_CODE, resp[2])}`;
-	}
+	return handle_response;
 }
